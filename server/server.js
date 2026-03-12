@@ -2,14 +2,23 @@ import express from 'express';
 import "dotenv/config";
 import cors from 'cors';
 import http from 'http';
-import { connect } from 'http2';
 import { connectDB } from './lib/db.js';
+import userRouter from './routes/userRoutes.js';
+import messageRouter from './routes/messageRoutes.js';
+import { Server } from 'socket.io';
 
 
 //Create express app and HTTP server
 
 const app = express();
 const server = http.createServer(app);
+
+// Initialize Socket.io server
+const io = new Server(server, {
+    cors: {origin: "*"}
+})
+
+//Store online users
 
 //Middleware setup
 app.use(cors());
@@ -18,6 +27,8 @@ app.use(express.json({limit: '4mb'}));
 
 //Routes
 app.use('/api/status',(req,res)=> res.send("Server is Active"));
+app.use('/api/users', userRouter)
+app.use('/api/messages', messageRouter)
 
 // Connect to MongoDB
 connectDB();
