@@ -19,6 +19,28 @@ const io = new Server(server, {
 })
 
 //Store online users
+export const onlineUsers = {}; //{userId: socketId}
+
+// Handle Socket.io connections
+io.on('connection', (socket) => {
+    const userId = socket.handshake.query.userId;
+    console.log("User Connected", userId);
+
+    if(userId){
+        onlineUsers[userId] = socket.id;
+    }
+
+    // Emmit online users to all clients
+    io.emit('onlineUsers', Object.keys(onlineUsers));
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        console.log("user disconnected", userId);
+        delete onlineUsers[userId];
+        io.emit('onlineUsers', Object.keys(onlineUsers));
+    })
+    
+});
 
 //Middleware setup
 app.use(cors());
