@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import Message from "../models/Message.js";
-import cloudinary from 'cloudinary.js';
+import cloudinary from "../lib/cloudinary.js";
 import { io, onlineUsers } from "../server.js";
 
 // Get all Users except the current loggedin user
