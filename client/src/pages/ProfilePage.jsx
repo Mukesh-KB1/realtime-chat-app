@@ -36,7 +36,7 @@ function ProfilePage() {
           <h3 className='text-lg'>Profile details</h3>
           <label htmlFor="avatar" className='flex items-center gap-3 cursor-pointer'>
             <input onChange={(e) => setSelectImg(e.target.files[0])} type="file" id='avatar' accept='.png, .jpg, .jpeg' hidden />
-            <img src={selectImg ? URL.createObjectURL(selectImg) : authUser?.profilePic || assets.logo_icon}
+            <img src={selectImg ? URL.createObjectURL(selectImg) : authUser?.profilePic || assets.avatar_icon}
               className={`w-12 h-12 ${selectImg || authUser?.profilePic ? "rounded-full" : ""}`} alt="" />
             upload profile image
           </label>
