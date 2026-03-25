@@ -12,19 +12,19 @@ function ChatContainer() {
 
   const scrollEnd = useRef()
 
-  const [ messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState('');
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if(messageInput.trim() === '') return;
+    if (messageInput.trim() === '') return;
     await sendMessage({ text: messageInput.trim() });
     setMessageInput('');
   }
 
   // Handle sending an Image
   const handleSendImage = async (e) => {
-    const file =  e.target.files[0];
-    if(!file || !file.type.startsWith('image/')) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) {
       toast.error("Please select an image file");
       return;
     }
@@ -39,11 +39,28 @@ function ChatContainer() {
 
   }
 
+  const formatDateLabel = (date) => {
+    const d = new Date(date);
+    const today = new Date();
+    const yesterday = new Date();
+
+    yesterday.setDate(today.getDate() - 1);
+
+    if (d.toDateString() === today.toDateString()) return "Today";
+    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+
+    return d.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  };
+
   useEffect(() => {
-    if(selectedUser) {
+    if (selectedUser) {
       getMessages(selectedUser._id);
     }
-  },[selectedUser])
+  }, [selectedUser])
 
   useEffect(() => {
     if (scrollEnd.current && messages) {
@@ -67,38 +84,77 @@ function ChatContainer() {
       {/* ------------  Chat area -------------- */}
       <div className='flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6'>
         {
-          messages.map((msg, index) => (
-            <div key={index} className={`flex items-end gap-2 justify-end ${msg.senderId !== authUser._id && 'flex-row-reverse'}`}>
-              {
-                msg.image ? (
-                  <img src={msg.image} alt="" className='max-w-57.5 border border-gray-700 rounded-lg overflow-hidden mb-8' />
-                ) : (
-                  <p className={`p-2 max-w-50 md:text-sm font-light rounded-lg mb-8 break-all bg-violet-500/30 text-white
-                      ${msg.senderId === authUser._id ? 'rounded-br-none' : 'rounded-bl-none'}`}>{msg.text}</p>
-                )
-              }
-              <div className='text-center text-xs'>
-                <img src={msg.senderId === authUser._id ? authUser?.profilePic || assets.avatar_icon : selectedUser?.profilePic || assets.avatar_icon} alt="" className='w-7 rounded-full' />
-                <p className='text-gray-500'>{formatMessageTime(msg.createdAt)}</p>
-              </div>
-            </div>
-          ))
+          // messages.map((msg, index) => (
+          //   <div key={index} className={`flex items-end gap-2 justify-end ${msg.senderId !== authUser._id && 'flex-row-reverse'}`}>
+          //     {
+          //       msg.image ? (
+          //         <img src={msg.image} alt="" className='max-w-57.5 border border-gray-700 rounded-lg overflow-hidden mb-8' />
+          //       ) : (
+          //         <p className={`p-2 max-w-50 md:text-sm font-light rounded-lg mb-8 break-all bg-violet-500/30 text-white
+          //             ${msg.senderId === authUser._id ? 'rounded-br-none' : 'rounded-bl-none'}`}>{msg.text}</p>
+          //       )
+          //     }
+          //     <div className='text-center text-xs'>
+          //       <img src={msg.senderId === authUser._id ? authUser?.profilePic || assets.avatar_icon : selectedUser?.profilePic || assets.avatar_icon} alt="" className='w-7 rounded-full' />
+          //       <p className='text-gray-500'>{formatMessageTime(msg.createdAt)}</p>
+          //     </div>
+          //   </div>
+          // ))
+
+          //New trial
+
+          messages.map((msg, index) => {
+            const currentDate = new Date(msg.createdAt).toDateString();
+            const prevDate =
+              index > 0
+                ? new Date(messages[index - 1].createdAt).toDateString()
+                : null;
+
+            const showDate = currentDate !== prevDate;
+
+            return (
+              <>
+                {showDate && (
+                  <div className="flex justify-center my-3">
+                    <span className="px-3 py-1 text-xs bg-gray-700 text-white rounded-full">
+                      {formatDateLabel(msg.createdAt)}
+                    </span>
+                  </div>
+                )}
+
+                <div key={index} className={`flex items-end gap-2 justify-end ${msg.senderId !== authUser._id && 'flex-row-reverse'}`}>
+                  {
+                    msg.image ? (
+                      <img src={msg.image} alt="" className='max-w-57.5 border border-gray-700 rounded-lg overflow-hidden mb-8' />
+                    ) : (
+                      <p className={`p-2 max-w-50 md:text-sm font-light rounded-lg mb-8 break-all bg-violet-500/30 text-white
+                        ${msg.senderId === authUser._id ? 'rounded-br-none' : 'rounded-bl-none'}`}>{msg.text}</p>
+                    )
+                  }
+                  <div className='text-center text-xs'>
+                    <img src={msg.senderId === authUser._id ? authUser?.profilePic || assets.avatar_icon : selectedUser?.profilePic || assets.avatar_icon} alt="" className='w-7 rounded-full' />
+                    <p className='text-gray-500'>{formatMessageTime(msg.createdAt)}</p>
+                  </div>
+                </div>
+              </>
+            );
+          })
         }
         <div ref={scrollEnd}></div>
-      </div>
+      </div >
 
       {/* --------------- Bottom Area ---------------- */}
 
-      <div className='absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3'>
+      < div className='absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3' >
         <div className='flex-1 flex items-center bg-gray-100/12 px-3 rounded-full'>
-          <input onChange={(e) => setMessageInput(e.target.value)} value={messageInput} 
-          onKeyDown={(e) => e.key === "Enter" ? handleSendMessage(e) : null} type="text" placeholder='Send a message' className='flex-1 text-sm p-3 border-none rounded-lg outline-none text-white placeholder-gray-400' />
+          <input onChange={(e) => setMessageInput(e.target.value)} value={messageInput}
+            onKeyDown={(e) => e.key === "Enter" ? handleSendMessage(e) : null} type="text" placeholder='Send a message' className='flex-1 text-sm p-3 border-none rounded-lg outline-none text-white placeholder-gray-400' />
           <input onChange={handleSendImage} type="file" id='image' accept='image/png, image/jpeg' className='hidden' />
           <label htmlFor="image">
             <img src={assets.gallery_icon} alt="" className='w-5 mr-2 cursor-pointer' />
           </label>
         </div>
-        <img onClick={ handleSendMessage } src={assets.send_button} alt="" className='w-7 cursor-pointer' />
+        <img onClick={handleSendMessage} src={assets.send_button} alt="" className='w-7 cursor-pointer' />
       </div>
 
     </div>

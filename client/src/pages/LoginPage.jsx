@@ -30,7 +30,7 @@ function LoginPage() {
 
       {/* ------------ left ------------- */}
 
-      <img src={assets.logo_big} alt="" className='w-[min(30vw,250px)]' />
+      <img src={assets.logo_big1} alt="" className='w-[min(30vw,250px)]' />
 
       {/* ------------ right ------------- */}
 
